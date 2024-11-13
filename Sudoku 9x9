@@ -3,34 +3,48 @@
 #include <ctime>
 using namespace std;
 
-void showTable(int tabla[9][9]){
-    for(int i = 0; i < 9; i++){
-        if (i % 3 == 0) { 
-            cout << "+-------+-------+-------+ \n";
+void ShowTable(int tabla[9][9]) {
+    for (int i = 0; i < 9; i++) {
+        if (i % 3 == 0) cout << "+-------+-------+-------+\n";
+        for (int j = 0; j < 9; j++) {
+            if (j % 3 == 0) cout << "| ";
+            cout << (tabla[i][j] ? tabla[i][j] : 0) << " ";
         }
-        for (int j = 0; j < 9; j++){
-            if(j % 3 == 0){
-                cout << "| ";
-            }
-            cout << tabla[i][j] << " ";
-        }
-        cout << "|"<< endl;
+        cout << "|\n";
     }
-    cout << "+-------+-------+-------+ \n";
+    cout << "+-------+-------+-------+\n";
 }
 
-bool isSafe(int tabla[9][9], int fila, int col, int num) {
+bool Safe(int tabla[9][9], int fila, int col, int num) {
+    int filarea = fila - fila % 3, colarea = col - col % 3;
     for (int x = 0; x < 9; x++) {
-        if (tabla[fila][x] == num || tabla[x][col] == num) {
+        if (tabla[fila][x] == num || tabla[x][col] == num || tabla[filarea + x / 3][colarea + x % 3] == num) 
             return false;
+    }
+    return true;
+}
+
+void seedRandomNumbers(int tabla[9][9], int count = 17) {
+    while (count > 0) {
+        int fila = rand() % 9, col = rand() % 9, num = rand() % 9 + 1;
+        if (tabla[fila][col] == 0 && isSafe(tabla, fila, col, num)) {
+            tabla[fila][col] = num;
+            count--;
         }
     }
+}
 
-    int filarea = fila - fila % 3;
-    int colarea = col - col % 3;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (tabla[i + filarea][j + colarea] == num) {
+bool Solve(int tabla[9][9]) {
+    for (int fila = 0; fila < 9; fila++) {
+        for (int col = 0; col < 9; col++) {
+            if (tabla[fila][col] == 0) {
+                for (int num = 1; num <= 9; num++) {
+                    if (isSafe(tabla, fila, col, num)) {
+                        tabla[fila][col] = num;
+                        if (Solve(tabla)) return true;
+                        tabla[fila][col] = 0;
+                    }
+                }
                 return false;
             }
         }
@@ -38,88 +52,21 @@ bool isSafe(int tabla[9][9], int fila, int col, int num) {
     return true;
 }
 
-bool isValidBoard(int tabla[9][9]) {
-    for (int fila = 0; fila < 9; fila++) {
-        for (int col = 0; col < 9; col++) {
-            if (tabla[fila][col] != 0) {
-                int num = tabla[fila][col];
-                tabla[fila][col] = 0; 
-                if (!isSafe(tabla, fila, col, num)) {
-                    return false;
-                }
-                tabla[fila][col] = num; 
-            }
-        }
-    }
-    return true;
-}
-
-bool CompleteNumbers(int tabla[9][9]) {
-    int numtab = 17;
-    do{
-        int fila = rand() % 9;
-        int col = rand() % 9;
-        int num = rand() % 9 + 1;
-        
-        if(tabla[fila][col] == 0 && isSafe(tabla, fila, col, num)){
-            tabla[fila][col] = num;
-            numtab--;
-        }
-    } while (numtab > 0);
-    return true;
-}
-
-bool Solve(int tabla[9][9]) {
-    int fila, col;
-    bool casillaVacia = false;
-
-    for (fila = 0; fila < 9; fila++) {
-        for (col = 0; col < 9; col++) {
-            if (tabla[fila][col] == 0) {
-                casillaVacia = true;
-                break;
-            }
-        }
-        if (casillaVacia) {
-            break;
-        }
-    }
-
-    if (!casillaVacia) {
-        return true;
-    }
-
-    for (int num = 1; num <= 9; num++) {
-        if (isSafe(tabla, fila, col, num)) {
-            tabla[fila][col] = num;
-
-            if (Solve(tabla)) {
-                return true;
-            }
-            
-            tabla[fila][col] = 0;
-        }
-    }
-
-    return false;
-}
-
-int main(){
+int main() {
     srand(time(NULL));
-    
     int table[9][9] = {0};
-    
-    CompleteNumbers(table);
 
-    cout << "Tablero incompleto: \n";
+    seedRandomNumbers(table);
+
+    cout << "Tablero incompleto :v \n";
     showTable(table);
 
-    if (!isValidBoard(table)) {
-        cout << "El tablero inicial no es válido.\n";
-    } else if (Solve(table)) {
-        cout << "Tablero resuelto: \n";
+    if (Solve(table)) {
+        cout << "Se pudo resolver el tablero >:'D \n";
         showTable(table);
     } else {
-        cout << "El tablero no se puede completar.\n";
+        cout << "El tablero no se puede completar jefe D: \n";
     }
+
+    cout << "By Rodrigo Nahuel Lopéz Garcete :v";
 }
