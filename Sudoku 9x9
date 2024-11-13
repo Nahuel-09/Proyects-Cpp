@@ -1,60 +1,81 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-
 using namespace std;
 
-const int N = 9;
-
-//Crear un tablero para el sudoku
-void imprimirTablero(int tablero[N][N]) {
-    for (int fila = 0; fila < N; fila++) {
-        if (fila % 3 == 0 && fila != 0) {
-            cout << "----------------------" << endl;
+void showTable(int tabla[9][9]){
+    for(int i = 0; i < 9; i++){
+        if (i % 3 == 0) { 
+            cout << "+-------+-------+-------+ \n";
         }
-        for (int col = 0; col < N; col++) {
-            if (col % 3 == 0 && col != 0) {
+        for (int j = 0; j < 9; j++){
+            if(j % 3 == 0){
                 cout << "| ";
-            } 
-            cout << tablero[fila][col] << " ";
-        }          
-        cout << endl;
+            }
+            cout << tabla[i][j] << " ";
+        }
+        cout << "|"<< endl;
     }
-    cout << endl;
+    cout << "+-------+-------+-------+ \n";
 }
 
-bool esSeguro(int tablero[N][N], int fila, int col, int num) {
-    for (int x = 0; x < N; x++) {
-        if (tablero[fila][x] == num) {
+bool isSafe(int tabla[9][9], int fila, int col, int num) {
+    for (int x = 0; x < 9; x++) {
+        if (tabla[fila][x] == num || tabla[x][col] == num) {
             return false;
         }
     }
 
-    for (int x = 0; x < N; x++) {
-        if (tablero[x][col] == num) {
-            return false;
-        }
-    }
-
-    int filarea = fila - fila % 3, colarea = col - col % 3;
+    int filarea = fila - fila % 3;
+    int colarea = col - col % 3;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (tablero[i + filarea][j + colarea] == num) {
+            if (tabla[i + filarea][j + colarea] == num) {
                 return false;
             }
         }
     }
-
     return true;
 }
 
-bool resolverSudoku(int tablero[N][N]) {
+bool isValidBoard(int tabla[9][9]) {
+    for (int fila = 0; fila < 9; fila++) {
+        for (int col = 0; col < 9; col++) {
+            if (tabla[fila][col] != 0) {
+                int num = tabla[fila][col];
+                tabla[fila][col] = 0; // Temporalmente quitamos el número para probar
+                if (!isSafe(tabla, fila, col, num)) {
+                    return false;
+                }
+                tabla[fila][col] = num; // Restauramos el número
+            }
+        }
+    }
+    return true;
+}
+
+bool CompleteNumbers(int tabla[9][9]) {
+    int numtab = 17;
+    do{
+        int fila = rand() % 9;
+        int col = rand() % 9;
+        int num = rand() % 9 + 1;
+        
+        if(tabla[fila][col] == 0 && isSafe(tabla, fila, col, num)){
+            tabla[fila][col] = num;
+            numtab--;
+        }
+    } while (numtab > 0);
+    return true;
+}
+
+bool Solve(int tabla[9][9]) {
     int fila, col;
     bool casillaVacia = false;
 
-    for (fila = 0; fila < N; fila++) {
-        for (col = 0; col < N; col++) {
-            if (tablero[fila][col] == 0) {
+    for (fila = 0; fila < 9; fila++) {
+        for (col = 0; col < 9; col++) {
+            if (tabla[fila][col] == 0) {
                 casillaVacia = true;
                 break;
             }
@@ -69,50 +90,36 @@ bool resolverSudoku(int tablero[N][N]) {
     }
 
     for (int num = 1; num <= 9; num++) {
-        if (esSeguro(tablero, fila, col, num)) {
-            tablero[fila][col] = num;
+        if (isSafe(tabla, fila, col, num)) {
+            tabla[fila][col] = num;
 
-            if (resolverSudoku(tablero)) {
+            if (Solve(tabla)) {
                 return true;
             }
-
-            tablero[fila][col] = 0;
+            
+            tabla[fila][col] = 0;
         }
     }
 
     return false;
 }
 
-void llenarTableroAleatorio(int tablero[N][N]) {
-    int numPistas = 17;
-    while (numPistas > 0) {
-        int fila = rand() % N;
-        int col = rand() % N;
-        int num = rand() % 9 + 1;
+int main(){
+    srand(time(NULL));
+    
+    int table[9][9] = {0};
+    
+    CompleteNumbers(table);
 
-        if (tablero[fila][col] == 0 && esSeguro(tablero, fila, col, num)) {
-            tablero[fila][col] = num;
-            numPistas--; 
-        }
-    }
-}
+    cout << "Tablero incompleto: \n";
+    showTable(table);
 
-int main() {
-    srand(time(0));  
-
-    int tablero[N][N] = {0};  
-
-    llenarTableroAleatorio(tablero);
-
-    cout << "Tablero generado aleatoriamente:" << endl;
-    imprimirTablero(tablero);
-
-    if (resolverSudoku(tablero)) {
-        cout << "Sudoku resuelto:" << endl;
-        imprimirTablero(tablero);
+    if (!isValidBoard(table)) {
+        cout << "El tablero inicial no es válido.\n";
+    } else if (Solve(table)) {
+        cout << "Tablero resuelto: \n";
+        showTable(table);
     } else {
-        cout << "No se pudo resolver el Sudoku." << endl;
+        cout << "El tablero no se puede completar.\n";
     }
-
-    return 0;
 }
