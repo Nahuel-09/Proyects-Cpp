@@ -43,11 +43,11 @@ bool isValidBoard(int tabla[9][9]) {
         for (int col = 0; col < 9; col++) {
             if (tabla[fila][col] != 0) {
                 int num = tabla[fila][col];
-                tabla[fila][col] = 0; // Temporalmente quitamos el número para probar
+                tabla[fila][col] = 0; 
                 if (!isSafe(tabla, fila, col, num)) {
                     return false;
                 }
-                tabla[fila][col] = num; // Restauramos el número
+                tabla[fila][col] = num; 
             }
         }
     }
