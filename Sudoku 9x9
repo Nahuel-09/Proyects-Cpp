@@ -24,10 +24,10 @@ bool Safe(int tabla[9][9], int fila, int col, int num) {
     return true;
 }
 
-void seedRandomNumbers(int tabla[9][9], int count = 17) {
+void SeedRandomNumbers(int tabla[9][9], int count = 17) {
     while (count > 0) {
         int fila = rand() % 9, col = rand() % 9, num = rand() % 9 + 1;
-        if (tabla[fila][col] == 0 && isSafe(tabla, fila, col, num)) {
+        if (tabla[fila][col] == 0 && Safe(tabla, fila, col, num)) {
             tabla[fila][col] = num;
             count--;
         }
@@ -39,7 +39,7 @@ bool Solve(int tabla[9][9]) {
         for (int col = 0; col < 9; col++) {
             if (tabla[fila][col] == 0) {
                 for (int num = 1; num <= 9; num++) {
-                    if (isSafe(tabla, fila, col, num)) {
+                    if (Safe(tabla, fila, col, num)) {
                         tabla[fila][col] = num;
                         if (Solve(tabla)) return true;
                         tabla[fila][col] = 0;
@@ -56,14 +56,14 @@ int main() {
     srand(time(NULL));
     int table[9][9] = {0};
 
-    seedRandomNumbers(table);
+    SeedRandomNumbers(table);
 
     cout << "Tablero incompleto :v \n";
-    showTable(table);
+    ShowTable(table);
 
     if (Solve(table)) {
         cout << "Se pudo resolver el tablero >:'D \n";
-        showTable(table);
+        ShowTable(table);
     } else {
         cout << "El tablero no se puede completar jefe D: \n";
     }
